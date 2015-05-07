@@ -1,0 +1,9 @@
+[package]
+name = "zip"
+version = "0.1.0"
+authors = ["J/A <archer884@gmail.com>"]
+
+[dependencies]
+hyper = "*"
+regex = "*"
+regex_macros = "*"
