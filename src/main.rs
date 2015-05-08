@@ -2,29 +2,14 @@
 #![plugin(regex_macros)]
 extern crate hyper;
 extern crate regex;
+mod error;
+use error::ZipError;
 use hyper::Client;
 use regex::Regex;
 use std::io::Read;
 
 static CITY: Regex = regex!("\"place name\": \"(.*?)\"");
 static STATE: Regex = regex!("\"state\": \"(.*?)\"");
-
-#[derive(Debug)]
-enum ZipError {
-    Input,
-    API,
-    Invalid(String),
-}
-
-impl ::std::fmt::Display for ZipError {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        match self {
-            &ZipError::Input => f.write_str("No zip provided"),
-            &ZipError::API => f.write_str("API unavailable"),
-            &ZipError::Invalid(ref candidate) => write!(f, "Invalid zip: {}", candidate),
-        }
-    }
-}
 
 fn main() {
     let result = std::env::args().nth(1).ok_or(ZipError::Input)
