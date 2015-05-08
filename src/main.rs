@@ -1,15 +1,17 @@
-#![feature(plugin)]
-#![plugin(regex_macros)]
+#![feature(custom_attribute, custom_derive, plugin)]
+#![plugin(serde_macros)]
+
 extern crate hyper;
-extern crate regex;
+extern crate serde;
+
+mod entity;
 mod error;
+
+use entity::ZipResult;
 use error::ZipError;
 use hyper::Client;
-use regex::Regex;
+use serde::json;
 use std::io::Read;
-
-static CITY: Regex = regex!("\"place name\": \"(.*?)\"");
-static STATE: Regex = regex!("\"state\": \"(.*?)\"");
 
 fn main() {
     let result = std::env::args().nth(1).ok_or(ZipError::Input)
@@ -17,7 +19,7 @@ fn main() {
         .and_then(|(candidate, response)| parse_result(candidate, response));
 
     match result {
-        Ok((city, state, zip)) => println!("{}, {} {}", city, state, zip),
+        Ok(zip_result) => println!("{}", zip_result),
         Err(e) => println!("{}", e),
     }
 }
@@ -35,15 +37,12 @@ fn query(candidate: String) -> Result<(String, String), ZipError> {
 fn read_response(response: &mut hyper::client::response::Response) -> String {
     let mut buf = String::new();
     response.read_to_string(&mut buf);
-    buf
+    buf.trim().to_string()
 }
 
-fn parse_result(candidate: String, result: String) -> Result<(String, String, String), ZipError> {
-    let city = CITY.captures(&result).and_then(|c| c.at(1));
-    let state = STATE.captures(&result).and_then(|c| c.at(1));
-
-    match (city, state) {
-        (Some(city), Some(state)) => Ok((city.to_string(), state.to_string(), candidate)),
-        _ => Err(ZipError::Invalid(candidate.to_string())),
+fn parse_result(candidate: String, result: String) -> Result<ZipResult, ZipError> {
+    match json::from_str(&result) {
+        Ok(result) => Ok(result),
+        Err(_) => Err(ZipError::Invalid(candidate)),
     }
 }
