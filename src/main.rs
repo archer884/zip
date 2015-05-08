@@ -37,7 +37,7 @@ fn query(candidate: String) -> Result<(String, String), ZipError> {
 fn read_response(response: &mut hyper::client::response::Response) -> String {
     let mut buf = String::new();
     response.read_to_string(&mut buf);
-    buf.trim().to_string()
+    buf
 }
 
 fn parse_result(candidate: String, result: String) -> Result<ZipResult, ZipError> {
