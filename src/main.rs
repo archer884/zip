@@ -14,9 +14,8 @@ use serde::json;
 use std::io::Read;
 
 fn main() {
-    let mut client = Client::new();
     let result = std::env::args().nth(1).ok_or(ZipError::Input)
-        .and_then(|candidate| query(&mut client, candidate))
+        .and_then(|candidate| query(&mut Client::new(), candidate))
         .and_then(|(candidate, response)| parse_result(candidate, response));
 
     match result {
