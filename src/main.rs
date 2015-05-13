@@ -15,7 +15,7 @@ use std::io::Read;
 
 fn main() {
     let result = std::env::args().nth(1).ok_or(ZipError::Input)
-        .and_then(|candidate| query(&mut Client::new(), candidate))
+        .and_then(|candidate| query(candidate))
         .and_then(|(candidate, response)| parse_result(candidate, response));
 
     match result {
@@ -24,11 +24,14 @@ fn main() {
     }
 }
 
-fn query(client: &mut Client, candidate: String) -> Result<(String, String), ZipError> {
-    match client.get(&format!("http://api.zippopotam.us/us/{}", candidate)).send() {
+fn query(candidate: String) -> Result<(String, String), ZipError> {
+    let mut client = Client::new();
+
+    // return statement -> expression as soon as rustc gets fixed
+    return match client.get(&format!("http://api.zippopotam.us/us/{}", candidate)).send() {
         Ok(mut res) => Ok((candidate, read_response(&mut res))),
         _ => Err(ZipError::API),
-    }     
+    };
 }
 
 #[allow(unused)]
