@@ -25,13 +25,11 @@ fn main() {
 }
 
 fn query(candidate: String) -> Result<(String, String), ZipError> {
-    let mut client = Client::new();
-
-    // return statement -> expression as soon as rustc gets fixed
-    return match client.get(&format!("http://api.zippopotam.us/us/{}", candidate)).send() {
+    // This code is valid, but it will not compile because the borrow checker sucks
+    match Client::new().get(&format!("http://api.zippopotam.us/us/{}", candidate)).send() {
         Ok(mut res) => Ok((candidate, read_response(&mut res))),
         _ => Err(ZipError::API),
-    };
+    }
 }
 
 #[allow(unused)]
