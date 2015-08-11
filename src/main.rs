@@ -1,8 +1,10 @@
-#![feature(custom_attribute, custom_derive, plugin)]
+#![feature(custom_derive, plugin)]
 #![plugin(serde_macros)]
 
 extern crate hyper;
-extern crate serde;
+extern crate serde_json;
+
+include!(concat!(env!("OUT_DIR"), "/main.rs"));
 
 mod entity;
 mod error;
@@ -10,7 +12,6 @@ mod error;
 use entity::ZipResult;
 use error::ZipError;
 use hyper::Client;
-use serde::json;
 use std::io::Read;
 
 fn main() {
@@ -25,7 +26,6 @@ fn main() {
 }
 
 fn query(candidate: String) -> Result<(String, String), ZipError> {
-    // This code is valid, but it will not compile because the borrow checker sucks
     match Client::new().get(&format!("http://api.zippopotam.us/us/{}", candidate)).send() {
         Ok(mut res) => Ok((candidate, read_response(&mut res))),
         _ => Err(ZipError::API),
@@ -33,7 +33,7 @@ fn query(candidate: String) -> Result<(String, String), ZipError> {
 }
 
 #[allow(unused)]
-fn read_response(response: &mut hyper::client::response::Response) -> String {
+fn read_response(response: &mut hyper::client::Response) -> String {
     let mut buf = String::new();
     response.read_to_string(&mut buf);
     buf

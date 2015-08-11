@@ -6,4 +6,5 @@ authors = ["J/A <archer884@gmail.com>"]
 [dependencies]
 hyper = "*"
 serde = "*"
+serde_json = "*"
 serde_macros = "*"
