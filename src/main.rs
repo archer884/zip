@@ -1,10 +1,9 @@
-#![feature(custom_derive, plugin)]
+#![feature(custom_attribute, custom_derive, plugin)]
 #![plugin(serde_macros)]
 
 extern crate hyper;
+extern crate serde;
 extern crate serde_json;
-
-include!(concat!(env!("OUT_DIR"), "/main.rs"));
 
 mod entity;
 mod error;
@@ -40,7 +39,7 @@ fn read_response(response: &mut hyper::client::Response) -> String {
 }
 
 fn parse_result(candidate: String, result: String) -> Result<ZipResult, ZipError> {
-    match json::from_str(&result) {
+    match serde_json::from_str(&result) {
         Ok(result) => Ok(result),
         Err(_) => Err(ZipError::Invalid(candidate)),
     }
